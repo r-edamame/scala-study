@@ -32,9 +32,11 @@ object MaybeApp extends App {
 
     val list = List(("x", 4), ("y", 3), ("z", 2))
 
-    val r = lookup("x", list) flatMap { n =>
-    lookup("y", list) flatMap { m =>
-        safeDiv(n, m)
-    }}
-    println(s"result: $r")
+    for (
+        n <- lookup("x", list);
+        m <- lookup("y", list);
+        r <- safeDiv(n, m)
+    ) yield {
+        println(s"result: $r")
+    }
 }
