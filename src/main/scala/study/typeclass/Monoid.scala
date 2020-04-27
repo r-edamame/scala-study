@@ -14,6 +14,10 @@ object Monoid {
         def add(x: String, y: String) = x + y
     }
 
+    def sum[A: Monoid](list: List[A]): A = {
+        list.reduceLeft((a,b) => Monoid[A].add(a,b))
+    }
+
     implicit def monoidForOption[A: Monoid] = new Monoid[Option[A]] {
         def zero: Option[A] = None
         def add(x: Option[A], y: Option[A]) = {
@@ -48,4 +52,29 @@ object MonoidApp2 extends App {
     val m2 = Some("World")
 
     println(M.add(m1, m2))
+}
+
+
+object MonoidApp3 extends App {
+    final case class Pair[A,B](fst: A, snd: B)
+
+    object Pair {
+        implicit def monoidForPair[A: Monoid,B: Monoid] = new Monoid[Pair[A,B]] {
+            def zero: Pair[A,B] = Pair(Monoid[A].zero, Monoid[B].zero)
+            def add(x: Pair[A,B], y: Pair[A,B]): Pair[A,B] = {
+                Pair(Monoid[A].add(x.fst, y.fst), Monoid[B].add(x.snd, y.snd))
+            }
+        }
+    }
+
+    val m: Pair[String, String] = Pair("Hello", "World")
+    val n: Pair[String, String] = Pair(" ", "!")
+
+    val Pair(h, w) = Monoid[Pair[String,String]].add(m, n)
+    println(Monoid[String].add(h,w))
+}
+
+object MonoidApp4 extends App {
+    def list = List("Hello", " ", "World", "!")
+    println(Monoid.sum(list))
 }
