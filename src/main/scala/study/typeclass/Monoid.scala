@@ -1,6 +1,8 @@
 
 package study.typeclass
 
+import scala.language.implicitConversions
+
 trait Monoid[T] {
     def zero: T
     def add(x: T, y: T): T
@@ -35,23 +37,38 @@ object Monoid {
             }
         }
     }
+
+    trait Ops[T] {
+        def self: T
+        def instance: Monoid[T]
+        def add(y: T): T = instance.add(self, y)
+    }
+
+    object ops {
+        implicit def toMonoidOps[T](target: T)(implicit m: Monoid[T]): Ops[T] = new Ops[T] {
+            def self = target
+            def instance = m
+        }
+    }
 }
 
 
 object MonoidApp extends App {
-    val M = Monoid[String]
-    val s1 = "Hello"
-    val s2 = "World"
+    import Monoid.ops._
 
-    println(M.add(s1, s2))
+    val s1: String = "Hello"
+    val s2: String = "World"
+
+    println(s1.add(s2))
 }
 
 object MonoidApp2 extends App {
-    val M = Monoid[Option[String]]
-    val m1 = Some("Hello")
-    val m2 = Some("World")
+    import Monoid.ops._
 
-    println(M.add(m1, m2))
+    val m1: Option[String] = Some("Hello")
+    val m2: Option[String] = Some("World")
+
+    println(m1.add(m2))
 }
 
 
@@ -70,8 +87,9 @@ object MonoidApp3 extends App {
     val m: Pair[String, String] = Pair("Hello", "World")
     val n: Pair[String, String] = Pair(" ", "!")
 
-    val Pair(h, w) = Monoid[Pair[String,String]].add(m, n)
-    println(Monoid[String].add(h,w))
+    import Monoid.ops._
+    val Pair(h, w) = m.add(n)
+    println(h.add(w))
 }
 
 object MonoidApp4 extends App {
