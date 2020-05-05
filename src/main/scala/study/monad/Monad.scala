@@ -7,11 +7,19 @@ trait Functor[F[_]] {
     def map[A,B](fa: F[A])(f: A => B): F[B]
 }
 
+object Functor {
+    def apply[F[_]: Functor]: Functor[F] = implicitly[Functor[F]]
+}
+
 trait Applicative[F[_]] extends Functor[F] {
     def ap[A,B](fa: F[A])(f: F[A => B]): F[B]
     def pure[A](a: A): F[A]
 
     def map[A,B](fa: F[A])(f: A => B): F[B] = ap(fa)(pure(f))
+}
+
+object Applicative {
+    def apply[F[_]: Applicative]: Applicative[F] = implicitly[Applicative[F]]
 }
 
 trait Monad[F[_]] extends Applicative[F] {
@@ -22,6 +30,8 @@ trait Monad[F[_]] extends Applicative[F] {
 }
 
 object Monad {
+    def apply[F[_]: Monad]: Monad[F] = implicitly[Monad[F]]
+
     implicit def monadForOption = new Monad[Option] {
         def pure[A](a: A): Option[A] = Some(a)
         /*
